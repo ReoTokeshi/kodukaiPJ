@@ -2,6 +2,10 @@ package jp.hamutaro.kodukai.form;
 
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 import org.springframework.format.annotation.DateTimeFormat;
 
 import jp.hamutaro.kodukai.entity.Expense;
@@ -9,12 +13,24 @@ import lombok.Data;
 
 @Data
 public class ExpenseForm {
+	
 	private Long id;
+	
+	@NotBlank(message = "カテゴリーは必須です")
     private String category;
+	
+	@NotBlank(message = "支払内容は必須です")
     private String description;
-    private int amount;
+	
+	@NotNull(message = "金額は必須です")
+	@Min(value = 1, message = "金額は1円以上で入力してください")
+    private Integer amount;
+	
+	@NotNull(message = "日付は必須です")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
+	
+	@NotBlank(message = "支払方法は必須です")
     private String payMethod;
     
     public Expense toEntity() {

@@ -20,7 +20,7 @@ public class Expense {
 	private Long id;
 	private String category;
 	private String description;
-	private int amount;
+	private Integer amount;
 	private LocalDate date;
 	private String payMethod;
 }

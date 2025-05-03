@@ -2,10 +2,13 @@ package jp.hamutaro.kodukai.controller;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,8 +32,14 @@ public class ExpenseController {
 	}
 	
     @PostMapping("/expenses")
-    public String submitExpense(@ModelAttribute ExpenseForm form) {
+    public String submitExpense(@Valid @ModelAttribute ExpenseForm form,
+    		                    BindingResult result,
+    		                    Model model) {
         
+    	if(result.hasErrors()) {
+    		return "expense_form";
+    	}
+    	
     	Expense expense = form.toEntity();
     	
         System.out.println("【支出登録フォームの入力内容】");
@@ -91,7 +100,13 @@ public class ExpenseController {
     }
 
     @PostMapping("/expenses/{id}/update")
-    public String updateExpense(@PathVariable Long id, @ModelAttribute ExpenseForm form) {
+    public String updateExpense(@PathVariable Long id, @Valid @ModelAttribute ExpenseForm form,
+    		                    BindingResult result, Model model) {
+    	
+    	if(result.hasErrors()) {
+    		return "expense_form";
+    	}
+    	
     	Expense expense = form.toEntity();
     	expense.setId(id);
         expenseRepository.save(expense);
