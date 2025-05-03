@@ -30,7 +30,7 @@
 		</tr>
 		</thead>
 		<tbody>
-		<tr th:each="expense : ${expenses}">
+		<tr th:each="expense : ${expenses.content}">
 		    <td th:text="${expense.category}">カテゴリー</td>
 			<td th:text="${expense.description}">内容</td>
 			<td th:text="${expense.amount}">金額</td>
@@ -49,6 +49,20 @@
 		</tr>
 		</tbody>
 	</table>
+	<nav class="mt-4">
+		<ul class="pagination justify-content-center">
+			<li class="page-item" th:classappend="${expenses.first} ? 'disabled'">
+				<a class="page-link" th:href="@{/expenses(page=${expenses.number - 1}, sort=${sort})}">前へ</a>
+			</li>
+			<li class="page-item" th:each="i : ${#numbers.sequence(0, expenses.totalPages - 1)}"
+			    th:classappend="${i == expenses.number} ? 'active'">
+				<a class="page-link" th:href="@{/expenses(page=${i}, sort=${sort})}" th:text="${i + 1}">1</a>
+			</li>
+			<li class="page-item" th:classappend="${expenses.last} ? 'disabled'">
+				<a class="page-link" th:href="@{/expenses(page=${expenses.number + 1}, sort=${sort})}">次へ</a>
+			</li>
+		</ul>
+	</nav>
 	<div class="mt-3">
 		<h5>合計金額: <span th:text="${totalAmount} + ' 円'"></span></h5>
 	</div>

@@ -1,10 +1,10 @@
 package jp.hamutaro.kodukai.controller;
 
-import java.util.List;
-
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -55,8 +55,11 @@ public class ExpenseController {
     }
     
     @GetMapping("/expenses")
-    public String listExpenses(@RequestParam(defaultValue = "date_desc") String sort, Model model) {
+    public String listExpenses(@RequestParam(defaultValue = "date_desc") String sort,
+    		                   @RequestParam(defaultValue = "0") int page,
+    		                   Model model) {
     	Sort sorting;
+    	int pageSize = 10;
     	
     	switch(sort) {
     	case "date_asc":
@@ -72,7 +75,7 @@ public class ExpenseController {
     		sorting = Sort.by(Sort.Direction.DESC, "date");
     	}
     	
-    	List<Expense> expenses = expenseRepository.findAll(sorting);
+    	Page<Expense> expenses = expenseRepository.findAll(PageRequest.of(page, pageSize, sorting));
     	
     	int totalAmount = expenses.stream()
     			                  .mapToInt(Expense::getAmount)
