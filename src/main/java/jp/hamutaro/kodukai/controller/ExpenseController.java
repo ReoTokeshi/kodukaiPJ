@@ -1,5 +1,7 @@
 package jp.hamutaro.kodukai.controller;
 
+import java.util.List;
+
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import jp.hamutaro.kodukai.dto.CategorySummary;
 import jp.hamutaro.kodukai.entity.Expense;
 import jp.hamutaro.kodukai.form.ExpenseForm;
 import jp.hamutaro.kodukai.repository.ExpenseRepository;
@@ -117,4 +120,27 @@ public class ExpenseController {
     	return "redirect:/expenses";
     }
     
+    @GetMapping("/expenses/summary")
+    public String showSummary(
+    		@RequestParam(defaultValue = "2025") int year,
+    		@RequestParam(defaultValue = "4") int month,
+    		Model model) {
+    	
+    	List<Object[]> rawData = expenseRepository.findCategoryTotalsByYearAndMonth(year, month);
+    	
+    	List<CategorySummary> summaryList = rawData.stream()
+    			                                   .map(row -> new CategorySummary((String) row[0], ((Number) row[1]).longValue()))
+    			                                   .toList();
+    	
+    	long monthlyTotal = summaryList.stream()
+                                      .mapToLong(CategorySummary::getTotal)
+                                      .sum();
+    	
+    	model.addAttribute("summaryList", summaryList);
+    	model.addAttribute("year", year);
+    	model.addAttribute("month", month);
+    	model.addAttribute("monthlyTotal", monthlyTotal);
+    	
+    	return "expense_summary";
+    }
 }
