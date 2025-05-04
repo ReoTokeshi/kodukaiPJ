@@ -20,20 +20,34 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import jp.hamutaro.kodukai.dto.CategorySummary;
+import jp.hamutaro.kodukai.entity.Category;
 import jp.hamutaro.kodukai.entity.Expense;
+import jp.hamutaro.kodukai.entity.PayMethod;
 import jp.hamutaro.kodukai.form.ExpenseForm;
+import jp.hamutaro.kodukai.repository.CategoryRepository;
 import jp.hamutaro.kodukai.repository.ExpenseRepository;
+import jp.hamutaro.kodukai.repository.PayMethodRepository;
 
 @Controller
 public class ExpenseController {
 	
 	@Autowired
 	private ExpenseRepository expenseRepository;
+	@Autowired
+	private CategoryRepository categoryRepository;
+	@Autowired
+	private PayMethodRepository payMethodRepository;
 	
 	@GetMapping("/expenses/new")
 	public String showForm(Model model) {
+		
+    	List<Category> categories = categoryRepository.findAll(Sort.by("id").ascending());
+    	List<PayMethod> payMethods = payMethodRepository.findAll(Sort.by("id").ascending());
+
 		model.addAttribute("expenseForm", new ExpenseForm());
+    	model.addAttribute("categories", categories);
+    	model.addAttribute("payMethods", payMethods);
+		
 		return "expense_form";
 	}
 	
@@ -43,17 +57,27 @@ public class ExpenseController {
     		                    Model model) {
         
     	if(result.hasErrors()) {
+        	List<Category> categories = categoryRepository.findAll(Sort.by("id").ascending());
+        	List<PayMethod> payMethods = payMethodRepository.findAll(Sort.by("id").ascending());
+        	
+        	model.addAttribute("categories", categories);
+        	model.addAttribute("payMethods", payMethods);
+        	
     		return "expense_form";
     	}
+        Category category = categoryRepository.findById(form.getCategoryId())
+                .orElseThrow(() -> new IllegalArgumentException("無効なカテゴリーIDです"));
+        PayMethod payMethod = payMethodRepository.findById(form.getPayMethodId())
+                .orElseThrow(() -> new IllegalArgumentException("無効な支払方法IDです"));
     	
-    	Expense expense = form.toEntity();
+    	Expense expense = form.toEntity(category, payMethod);
     	
         System.out.println("【支出登録フォームの入力内容】");
-        System.out.println("カテゴリー: " + form.getCategory());
+        System.out.println("カテゴリー: " + form.getCategoryId());
         System.out.println("内容: " + form.getDescription());
         System.out.println("金額: " + form.getAmount());
         System.out.println("日付: " + form.getDate());
-        System.out.println("支払方法: " + form.getPayMethod());
+        System.out.println("支払方法: " + form.getPayMethodId());
         
         expenseRepository.save(expense);
     	
@@ -132,7 +156,12 @@ public class ExpenseController {
     @GetMapping("/expenses/{id}/edit")
     public String editExpense(@PathVariable Long id, Model model) {
     	Expense expense = expenseRepository.findById(id).orElseThrow();
+    	List<Category> categories = categoryRepository.findAll(Sort.by("id").ascending());
+    	List<PayMethod> payMethods = payMethodRepository.findAll(Sort.by("id").ascending());
+    	
     	model.addAttribute("expenseForm", ExpenseForm.fromEntity(expense));
+    	model.addAttribute("categories", categories);
+    	model.addAttribute("payMethods", payMethods);
     	
     	return "expense_form";
     }
@@ -142,10 +171,22 @@ public class ExpenseController {
     		                    BindingResult result, Model model) {
     	
     	if(result.hasErrors()) {
+        	List<Category> categories = categoryRepository.findAll(Sort.by("id").ascending());
+        	List<PayMethod> payMethods = payMethodRepository.findAll(Sort.by("id").ascending());
+        	
+        	model.addAttribute("categories", categories);
+        	model.addAttribute("payMethods", payMethods);
+        	
     		return "expense_form";
     	}
     	
-    	Expense expense = form.toEntity();
+        Category category = categoryRepository.findById(form.getCategoryId())
+                .orElseThrow(() -> new IllegalArgumentException("無効なカテゴリーIDです"));
+        PayMethod payMethod = payMethodRepository.findById(form.getPayMethodId())
+                .orElseThrow(() -> new IllegalArgumentException("無効な支払方法IDです"));
+    	
+    	Expense expense = form.toEntity(category, payMethod);
+    	
     	expense.setId(id);
         expenseRepository.save(expense);
     	
@@ -153,27 +194,27 @@ public class ExpenseController {
     }
     
     //未使用
-    @GetMapping("/expenses/summary")
-    public String showSummary(
-    		@RequestParam(defaultValue = "2025") int year,
-    		@RequestParam(defaultValue = "4") int month,
-    		Model model) {
-    	
-    	List<Object[]> rawData = expenseRepository.findCategoryTotalsByYearAndMonth(year, month);
-    	
-    	List<CategorySummary> summaryList = rawData.stream()
-    			                                   .map(row -> new CategorySummary((String) row[0], ((Number) row[1]).longValue()))
-    			                                   .toList();
-    	
-    	long monthlyTotal = summaryList.stream()
-                                      .mapToLong(CategorySummary::getTotal)
-                                      .sum();
-    	
-    	model.addAttribute("summaryList", summaryList);
-    	model.addAttribute("year", year);
-    	model.addAttribute("month", month);
-    	model.addAttribute("monthlyTotal", monthlyTotal);
-    	
-    	return "expense_summary";
-    }
+    //@GetMapping("/expenses/summary")
+    //public String showSummary(
+    //		@RequestParam(defaultValue = "2025") int year,
+    //		@RequestParam(defaultValue = "4") int month,
+    //		Model model) {
+    //	
+    //	List<Object[]> rawData = expenseRepository.findCategoryTotalsByYearAndMonth(year, month);
+    //	
+    //	List<CategorySummary> summaryList = rawData.stream()
+    //			                                   .map(row -> new CategorySummary((String) row[0], ((Number) row[1]).longValue()))
+    //			                                   .toList();
+    //	
+    //	long monthlyTotal = summaryList.stream()
+    //                                  .mapToLong(CategorySummary::getTotal)
+    //                                  .sum();
+    //	
+    //	model.addAttribute("summaryList", summaryList);
+    //	model.addAttribute("year", year);
+    //	model.addAttribute("month", month);
+    //	model.addAttribute("monthlyTotal", monthlyTotal);
+    //	
+    //	return "expense_summary";
+    //}
 }

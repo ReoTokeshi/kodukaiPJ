@@ -40,32 +40,31 @@
 	</div>
 	<table class="table table-bordered">
 		<thead class="table-dark">
-		<tr>
-			<th>カテゴリー</th>
-			<th>内容</th>
-			<th>金額</th>
-			<th>日付</th>
-			<th>支払方法</th>
-			<th></th>
-			<th></th>
-		</tr>
+			<tr class="text-center">
+				<th>カテゴリー</th>
+				<th>内容</th>
+				<th>金額</th>
+				<th>日付</th>
+				<th>支払方法</th>
+				<th class="bg-secondary text-white">操作</th>
+			</tr>
 		</thead>
 		<tbody>
 		<tr th:each="expense : ${expensesPage.content}">
-		    <td th:text="${expense.category}">カテゴリー</td>
+		    <td th:text="${expense.category == null ? '' : expense.category.categoryName}">カテゴリー</td>
 			<td th:text="${expense.description}">内容</td>
 			<td th:text="${expense.amount}">金額</td>
 			<td th:text="${expense.date}">日付</td>
-			<td th:text="${expense.payMethod}">支払方法</td>
+			<td th:text="${expense.payMethod == null ? '' : expense.payMethod.payMethodName}">支払方法</td>
 			<td>
-		    	<form th:action="@{'/expenses/' + ${expense.id} + '/delete'}" method="post">
-				    <button type ="submit" class="btn btn-sm btn-danger" onclick="return confirm('本当に削除しますか？');">削除</button>
-			    </form>
-			</td>
-			<td>
-				<form th:action="@{'/expenses/' + ${expense.id} + '/edit'}" method="get">
-				    <button type ="submit" class="btn btn-sm btn-secondary">編集</button>
-				</form>
+				<div class="d-flex gap-2 justify-content-center">
+		    		<form th:action="@{'/expenses/' + ${expense.id} + '/delete'}" method="post">
+				    	<button type ="submit" class="btn btn-sm btn-outline-danger" title="削除" onclick="return confirm('本当に削除しますか？');">削除</button>
+			    	</form>
+					<form th:action="@{'/expenses/' + ${expense.id} + '/edit'}" method="get">
+				    	<button type ="submit" class="btn btn-sm btn-outline-secondary" title="編集">編集</button>
+					</form>
+				</div>
 			</td>
 		</tr>
 		</tbody>

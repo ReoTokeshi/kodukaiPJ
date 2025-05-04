@@ -8,7 +8,9 @@ import jakarta.validation.constraints.NotNull;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import jp.hamutaro.kodukai.entity.Category;
 import jp.hamutaro.kodukai.entity.Expense;
+import jp.hamutaro.kodukai.entity.PayMethod;
 import lombok.Data;
 
 @Data
@@ -16,8 +18,8 @@ public class ExpenseForm {
 	
 	private Long id;
 	
-	@NotBlank(message = "カテゴリーは必須です")
-    private String category;
+	@NotNull(message = "カテゴリーは必須です")
+    private Long categoryId;
 	
 	@NotBlank(message = "支払内容は必須です")
     private String description;
@@ -30,18 +32,19 @@ public class ExpenseForm {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
 	
-	@NotBlank(message = "支払方法は必須です")
-    private String payMethod;
+	@NotNull(message = "支払方法は必須です")
+    private Long payMethodId;
     
-    public Expense toEntity() {
+    public Expense toEntity(Category category, PayMethod payMethod) {
     	
     	Expense expense = new Expense();
+        
     	expense.setId(this.getId());
-    	expense.setCategory(this.getCategory());
         expense.setDescription(this.getDescription());
         expense.setAmount(this.getAmount());
         expense.setDate(this.getDate());
-        expense.setPayMethod(this.getPayMethod());
+    	expense.setCategory(category);
+        expense.setPayMethod(payMethod);
     	
     	return expense;
     }
@@ -50,11 +53,11 @@ public class ExpenseForm {
     	
     	ExpenseForm form = new ExpenseForm();
     	form.setId(expense.getId());
-    	form.setCategory(expense.getCategory());
+    	form.setCategoryId(expense.getCategory().getId());
         form.setDescription(expense.getDescription());
         form.setAmount(expense.getAmount());
         form.setDate(expense.getDate());
-        form.setPayMethod(expense.getPayMethod());
+        form.setPayMethodId(expense.getPayMethod().getId());
     	
     	return form;
     }
