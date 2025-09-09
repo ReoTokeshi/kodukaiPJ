@@ -68,9 +68,9 @@ cd kodukaiPJ
 # 2. MySQLで以下のデータベースを作成
 CREATE DATABASE kodukai_db CHARACTER SET utf8mb4;
 
-# 3. application.properties のDB接続情報を設定
-spring.datasource.username=your-username
-spring.datasource.password=your-password
+# 3. ファイル名を変更「application_dummy.properties」⇒「application.properties」し、DB接続情報を設定
+spring.datasource.username="your-username"
+spring.datasource.password="your-password"
 
 # 4. アプリケーションの起動
 ./gradlew bootRun
